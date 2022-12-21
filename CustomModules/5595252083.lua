@@ -13,6 +13,10 @@ local requestfunc = syn and syn.request or http and http.request or http_request
 local getasset = getsynasset or getcustomasset
 local main
 local raycastparams
+local betterisfile = function(file)
+	local suc, res = pcall(function() return readfile(file) end)
+	return suc and res ~= nil
+end
 
 for i,v in pairs(getgc(true)) do
     if type(v) == "table" then
@@ -56,8 +60,8 @@ local function getPlayerColor(plr)
 end
 
 local function getcustomassetfunc(path)
-	if not isfile(path) then
-		spawn(function()
+	if not betterisfile(path) then
+		task.spawn(function()
 			local textlabel = Instance.new("TextLabel")
 			textlabel.Size = UDim2.new(1, 0, 0, 36)
 			textlabel.Text = "Downloading "..path
@@ -68,7 +72,7 @@ local function getcustomassetfunc(path)
 			textlabel.TextColor3 = Color3.new(1, 1, 1)
 			textlabel.Position = UDim2.new(0, 0, 0, -36)
 			textlabel.Parent = GuiLibrary["MainGui"]
-			repeat wait() until isfile(path)
+			repeat task.wait() until betterisfile(path)
 			textlabel:Remove()
 		end)
 		local req = requestfunc({
