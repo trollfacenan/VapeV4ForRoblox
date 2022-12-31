@@ -1594,7 +1594,7 @@ local function getPlayerColor(plr)
 end
 
 local function targetCheck(plr)
-	return plr and plr:FindFirstChildOfClass("Humanoid") and plr.Humanoid.Health > 0 and plr.Character:FindFirstChild("ForceField") == nil
+	return plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("ForceField") == nil
 end
 do
 	entity.selfDestruct()
