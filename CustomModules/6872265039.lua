@@ -1,4 +1,8 @@
--- Credits to Inf Yield & all the other scripts that helped me make bypasses
+--[[ 
+	Credits
+	Infinite Yield - Blink
+	Please notify me if you need credits
+]]
 local GuiLibrary = shared.GuiLibrary
 local players = game:GetService("Players")
 local textservice = game:GetService("TextService")
@@ -172,7 +176,7 @@ end
 
 local function getcustomassetfunc(path)
 	if not betterisfile(path) then
-		spawn(function()
+		task.spawn(function()
 			local textlabel = Instance.new("TextLabel")
 			textlabel.Size = UDim2.new(1, 0, 0, 36)
 			textlabel.Text = "Downloading "..path
@@ -211,8 +215,6 @@ local function createwarning(title, text, delay)
 	return (suc and res)
 end
 
-local newupdate = lplr.PlayerScripts.TS:WaitForChild("ui", 3) and true or false
-
 runcode(function()
     local flaggedremotes = {"SelfReport"}
 
@@ -226,10 +228,10 @@ runcode(function()
         bedwars = {
 			["BedwarsKits"] = require(repstorage.TS.games.bedwars.kit["bedwars-kit-shop"]).BedwarsKitShop,
             ["ClientHandler"] = Client,
-            ["ClientStoreHandler"] = (newupdate and require(lplr.PlayerScripts.TS.ui.store).ClientStore or require(lplr.PlayerScripts.TS.rodux.rodux).ClientStore),
+            ["ClientStoreHandler"] = require(lplr.PlayerScripts.TS.ui.store).ClientStore,
 			["QueryUtil"] = require(repstorage["rbxts_include"]["node_modules"]["@easy-games"]["game-core"].out).GameQueryUtil,
 			["KitMeta"] = require(repstorage.TS.games.bedwars.kit["bedwars-kit-meta"]).BedwarsKitMeta,
-			["LobbyClientEvents"] = (newupdate and require(repstorage["rbxts_include"]["node_modules"]["@easy-games"].lobby.out.client.events).LobbyClientEvents),
+			["LobbyClientEvents"] = KnitClient.Controllers.QueueController,
             ["sprintTable"] = KnitClient.Controllers.SprintController,
 			["WeldTable"] = require(repstorage.TS.util["weld-util"]).WeldUtil,
 			["QueueMeta"] = require(repstorage.TS.game["queue-meta"]).QueueMeta,
@@ -684,24 +686,10 @@ JoinQueue = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOp
 					end
 					if JoinQueue["Enabled"] and JoinQueueTypes["Value"] ~= "" then
 						if bedwars["ClientStoreHandler"]:getState().Party.queueState > 0 then
-							if newupdate then
-								bedwars["LobbyClientEvents"].leaveQueue:fire()
-							else
-								bedwars["ClientHandler"]:Get("LeaveQueue"):CallServer()
-							end
+							bedwars["LobbyClientEvents"]:leaveQueue()
 						end
-						if bedwars["ClientStoreHandler"]:getState().Party.leader.userId == lplr.UserId and (newupdate and bedwars["LobbyClientEvents"].joinQueue:fire({
-							queueType = findfrom(JoinQueueTypes["Value"])
-						}) or (not newupdate) and bedwars["ClientHandler"]:Get("JoinQueue"):CallServer({
-							queueType = findfrom(JoinQueueTypes["Value"])
-						})) then
-							if JoinQueue["Enabled"] == false and bedwars["ClientStoreHandler"]:getState().Party.queueState > 0 then
-								if newupdate then
-									bedwars["LobbyClientEvents"].leaveQueue:fire()
-								else
-									bedwars["ClientHandler"]:Get("LeaveQueue"):CallServer()
-								end
-							end
+						if bedwars["ClientStoreHandler"]:getState().Party.leader.userId == lplr.UserId and bedwars["LobbyClientEvents"]:joinQueue(findfrom(JoinQueueTypes["Value"])) then
+							bedwars["LobbyClientEvents"]:leaveQueue()
 						end
 						repeat task.wait() until bedwars["ClientStoreHandler"]:getState().Party.queueState == 3 or JoinQueue["Enabled"] == false
 						for i = 1, 10 do
@@ -711,11 +699,7 @@ JoinQueue = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOp
 							task.wait(1)
 						end
 						if bedwars["ClientStoreHandler"]:getState().Party.queueState > 0 then
-							if newupdate then
-								bedwars["LobbyClientEvents"].leaveQueue:fire()
-							else
-								bedwars["ClientHandler"]:Get("LeaveQueue"):CallServer()
-							end
+							bedwars["LobbyClientEvents"]:leaveQueue()
 						end
 					end
 				until JoinQueue["Enabled"] == false
@@ -724,11 +708,7 @@ JoinQueue = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOp
 			firstqueue = false
 			shared.vapeteammembers = nil
 			if bedwars["ClientStoreHandler"]:getState().Party.queueState > 0 then
-				if newupdate then
-					bedwars["LobbyClientEvents"].leaveQueue:fire()
-				else
-					bedwars["ClientHandler"]:Get("LeaveQueue"):CallServer()
-				end
+				bedwars["LobbyClientEvents"]:leaveQueue()
 			end
 		end
 	end
@@ -772,9 +752,10 @@ runcode(function()
 				[1] = "Trinity",
 				[2] = "Grim Reaper",
 				[3] = "Eldertree",
-				[4] = "Barbarian",
-				[5] = "Melody",
-				[6] = "Baker"
+				[4] = "Metal Detector",
+				[5] = "Barbarian",
+				[6] = "Melody",
+				[7] = "Baker"
 			}
 			tab2 = {}
 		end
@@ -957,9 +938,9 @@ runcode(function()
 	speedval = speed.CreateSlider({
 		["Name"] = "Speed",
 		["Min"] = 1,
-		["Max"] = 54,
+		["Max"] = 23,
 		["Function"] = function(val) end,
-		["Default"] = 54
+		["Default"] = 23
 	})
 	speedjumpheight = speed.CreateSlider({
 		["Name"] = "Jump Height",

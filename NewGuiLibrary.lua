@@ -56,8 +56,7 @@ if shared.VapeExecuted then
 		end
 	end
 
-	local translations = {}--loadstring(GetURL("translations/"..api["Language"]..".vapetranslation") or GetURL("translations/en-us.vapetranslation"))()
-	--local translatedlogo, res = pcall(function() return GetURL("translations/"..api["Language"].."/VapeLogo1.png") end)
+	local translations = shared.VapeTranslation or {}
 	local translatedlogo = false
 
 	local function getprofile()
@@ -1394,6 +1393,7 @@ if shared.VapeExecuted then
 					slider1.Name = "Slider"
 					slider1.Parent = frame
 					local slider2 = Instance.new("Frame")
+					slider2.BorderSizePixel = 0
 					slider2.Size = UDim2.new(math.clamp(((argstable["Default"] or argstable["Min"]) / argstable["Max"]), 0.02, 0.97), 0, 1, 0)
 					slider2.BackgroundColor3 = Color3.fromHSV(api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Hue"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Sat"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Value"])
 					slider2.Name = "FillSlider"
@@ -1847,15 +1847,12 @@ if shared.VapeExecuted then
 					end
 				end)
 			end)
+			local clicktick = tick()
 			slider3.MouseButton1Down:Connect(function()
-				task.spawn(function()
-					click = true
-					task.wait(0.3)
-					click = false
-				end)
-				if click then
+				if clicktick > tick() then
 					sliderapi["SetRainbow"](not sliderapi["RainbowValue"])
 				end
+				clicktick = tick() + 0.3
 				local x,y,xscale,yscale,xscale2 = RelativeXY(slider1, game:GetService("UserInputService"):GetMouseLocation())
 				sliderapi["SetValue"](min + ((max - min) * xscale), 0.7, 0.9)
 				--slider3.Position = UDim2.new(math.clamp(xscale2, 0.02, 0.95), -9, 0, -5)
@@ -2280,6 +2277,7 @@ if shared.VapeExecuted then
 			slider1.Name = "Slider"
 			slider1.Parent = frame
 			local slider2 = Instance.new("Frame")
+			slider2.BorderSizePixel = 0
 			slider2.Size = UDim2.new(math.clamp(((argstable["Default"] or argstable["Min"]) / argstable["Max"]), 0.02, 0.97), 0, 1, 0)
 			slider2.BackgroundColor3 = Color3.fromHSV(api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Hue"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Sat"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Value"])
 			slider2.Name = "FillSlider"
@@ -3117,15 +3115,12 @@ if shared.VapeExecuted then
 					end
 				end)
 			end)
+			local clicktick = tick()
 			slider3.MouseButton1Down:Connect(function()
-				task.spawn(function()
-					click = true
-					task.wait(0.3)
-					click = false
-				end)
-				if click then
+				if clicktick > tick() then
 					sliderapi["SetRainbow"](not sliderapi["RainbowValue"])
 				end
+				clicktick = tick() + 0.3
 				local x,y,xscale,yscale,xscale2 = RelativeXY(slider1, game:GetService("UserInputService"):GetMouseLocation())
 				sliderapi["SetValue"](min + ((max - min) * xscale))
 				slider3.Position = UDim2.new(math.clamp(xscale2, 0.02, 0.95), -9, 0, -7)
@@ -4922,15 +4917,12 @@ if shared.VapeExecuted then
 						end))
 					end
 				end
+				local clicktick = tick()
 				local function slidercode(obj, valtochange)
-					task.spawn(function()
-						click = true
-						task.wait(0.3)
-						click = false
-					end)
-					if click then
+					if clicktick > tick() then
 						sliderapi["SetRainbow"](not sliderapi["RainbowValue"])
 					end
+					clicktick = tick() + 0.3
 					local x,y,xscale,yscale,xscale2 = RelativeXY(obj, game:GetService("UserInputService"):GetMouseLocation())
 					sliderapi["SetValue"]((valtochange == "Hue" and (min + ((max - min) * xscale)) or false), (valtochange == "Sat" and (min + ((max - min) * xscale)) or false), (valtochange == "Value" and (min + ((max - min) * xscale)) or false))
 					obj.ButtonSlider.Position = UDim2.new(math.clamp(xscale2, 0.02, 0.95), -9, 0, -7)
@@ -5059,6 +5051,7 @@ if shared.VapeExecuted then
 				slider1.Name = "Slider"
 				slider1.Parent = frame
 				local slider2 = Instance.new("Frame")
+				slider2.BorderSizePixel = 0
 				slider2.Size = UDim2.new(math.clamp(((argstable["Default"] or argstable["Min"]) / argstable["Max"]), 0.02, 0.97), 0, 1, 0)
 				slider2.BackgroundColor3 = Color3.fromHSV(api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Hue"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Sat"], api["ObjectsThatCanBeSaved"]["Gui ColorSliderColor"]["Api"]["Value"])
 				slider2.Name = "FillSlider"
@@ -5777,15 +5770,12 @@ if shared.VapeExecuted then
 					end))
 				end
 			end
+			local clicktick = tick()
 			local function slidercode(obj, valtochange)
-				task.spawn(function()
-					click = true
-					task.wait(0.3)
-					click = false
-				end)
-				if click then
+				if clicktick > tick() then
 					sliderapi["SetRainbow"](not sliderapi["RainbowValue"])
 				end
+				clicktick = tick() + 0.3
 				local x,y,xscale,yscale,xscale2 = RelativeXY(obj, game:GetService("UserInputService"):GetMouseLocation())
 				sliderapi["SetValue"]((valtochange == "Hue" and (min + ((max - min) * xscale)) or false), (valtochange == "Sat" and (min + ((max - min) * xscale)) or false), (valtochange == "Value" and (min + ((max - min) * xscale)) or false))
 				obj.ButtonSlider.Position = UDim2.new(math.clamp(xscale2, 0.02, 0.95), -9, 0, -7)

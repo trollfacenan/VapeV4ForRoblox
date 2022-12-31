@@ -6,6 +6,7 @@ local betterisfile = function(file)
 	local suc, res = pcall(function() return readfile(file) end)
 	return suc and res ~= nil
 end
+local shown = false
 local function GetURL(scripturl)
 	if shared.VapeDeveloper then
 		if not betterisfile("vape/"..scripturl) then
@@ -13,7 +14,25 @@ local function GetURL(scripturl)
 		end
 		return readfile("vape/"..scripturl)
 	else
-		local res = game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/"..scripturl, true)
+		local res
+		task.delay(15, function()
+			if res == nil and (not shown) then 
+				shown = true
+				local ErrorPrompt = getrenv().require(game:GetService("CoreGui").RobloxGui.Modules.ErrorPrompt)
+				local prompt = ErrorPrompt.new("Default")
+				prompt._hideErrorCode = true
+				local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+				prompt:setParent(gui)
+				prompt:setErrorTitle("Vape")
+				prompt:updateButtons({{
+					Text = "OK",
+					Callback = function() prompt:_close() end,
+					Primary = true
+				}}, 'Default')
+				prompt:_open("The connection to github is taking a while, Please be patient.")
+			end
+		end)
+		res = game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/"..scripturl, true)
 		assert(res ~= "404: Not Found", "File not found")
 		return res
 	end
@@ -37,15 +56,8 @@ local requestfunc = syn and syn.request or http and http.request or http_request
 end 
 
 local function checkassetversion()
-	local req = requestfunc({
-		Url = "https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/assetsversion.dat",
-		Method = "GET"
-	})
-	if req.StatusCode == 200 then
-		return req.Body
-	else
-		return nil
-	end
+	local suc, res = pcall(function() return GetURL("assetsversion.dat", true) end)
+	if suc then return res else return nil end
 end
 
 if not (getasset and requestfunc and queueteleport) then
@@ -59,7 +71,7 @@ if shared.VapeExecuted then
 else
 	shared.VapeExecuted = true
 end
-
+local redownload = false
 if isfolder(customdir:gsub("/", "")) == false then
 	makefolder(customdir:gsub("/", ""))
 end
@@ -78,24 +90,26 @@ end
 if not betterisfile("vape/language.dat") then
 	writefile("vape/language.dat", "en-us")
 end
-local assetver = checkassetversion()
-if assetver and assetver > readfile("vape/assetsversion.dat") then
-	if shared.VapeDeveloper == nil then
-		if isfolder("vape/assets") then
+if isfolder("vape/assets") == false then
+	makefolder("vape/assets")
+end
+task.spawn(function()
+	local assetver = checkassetversion()
+	if assetver and assetver > readfile("vape/assetsversion.dat") then
+		redownload = true
+		if isfolder("vape/assets") and shared.VapeDeveloper == nil then
 			if delfolder then
 				delfolder("vape/assets")
+				makefolder("vape/assets")
 			end
 		end
 		writefile("vape/assetsversion.dat", assetver)
 	end
-end
-if isfolder("vape/assets") == false then
-	makefolder("vape/assets")
-end
+end)
 
 local GuiLibrary = loadstring(GetURL("NewGuiLibrary.lua"))()
-local translations = {}--loadstring(GetURL("translations/"..GuiLibrary["Language"]..".vapetranslation"))()
-local translatedlogo = false--pcall(function() return GetURL("translations/"..GuiLibrary["Language"].."/VapeLogo1.png") end)
+local translations = shared.VapeTranslation or {}
+local translatedlogo = false
 
 local checkpublicreponum = 0
 local checkpublicrepo
@@ -131,7 +145,7 @@ end
 
 local function getcustomassetfunc(path)
 	if not betterisfile(path) then
-		spawn(function()
+		task.spawn(function()
 			local textlabel = Instance.new("TextLabel")
 			textlabel.Size = UDim2.new(1, 0, 0, 36)
 			textlabel.Text = "Downloading "..path
@@ -166,6 +180,35 @@ local selfdestructsave = coroutine.create(function()
 			break
 		end
 	end
+end)
+task.spawn(function()
+	local image = Instance.new("ImageLabel")
+	image.Image = getcustomassetfunc("vape/assets/CombatIcon.png")
+	image.Position = UDim2.new(0, 0, 0, 0)
+	image.BackgroundTransparency = 1
+	image.Size = UDim2.new(0, 1, 0, 1)
+	image.ImageTransparency = 0.999
+	image.Parent = GuiLibrary["MainGui"]
+	task.delay(15, function()
+		if image.ContentImageSize == Vector2.new(0, 0) and (not shown) and (not redownload) and (not betterisfile("vape/assets/check3.txt")) then 
+			shown = true
+			local ErrorPrompt = getrenv().require(game:GetService("CoreGui").RobloxGui.Modules.ErrorPrompt)
+			local prompt = ErrorPrompt.new("Default")
+			prompt._hideErrorCode = true
+			local gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+			prompt:setParent(gui)
+			prompt:setErrorTitle("Vape")
+			prompt:updateButtons({{
+				Text = "OK",
+				Callback = function() 
+					prompt:_close() 
+					writefile("vape/assets/check3.txt", "")
+				end,
+				Primary = true
+			}}, 'Default')
+			prompt:_open("Vape has detected that you have a skill issue and cannot load assets, Consider getting a better executor.")
+		end
+	end)
 end)
 local GUI = GuiLibrary.CreateMainWindow()
 local Combat = GuiLibrary.CreateWindow({
@@ -279,6 +322,7 @@ local friendrecolor = Friends.CreateToggle({
 	["Function"] = function(callback) FriendsTextList.FriendColorRefresh:Fire() end,
 	["Default"] = true
 })
+local friendsscrollingframe
 FriendsColor = Friends.CreateColorSlider({
 	["Name"] = "Friends Color", 
 	["Function"] = function(h, s, v) 
@@ -287,11 +331,14 @@ FriendsColor = Friends.CreateColorSlider({
 		if addcirc then 
 			addcirc.ImageColor3 = col
 		end
-		for i,v in pairs(FriendsTextList["ScrollingObject"].ScrollingFrame:GetChildren()) do 
-			local friendcirc = v:FindFirstChild("FriendCircle")
-			local itemtext = v:FindFirstChild("ItemText")
-			if friendcirc and itemtext then 
-				friendcirc.BackgroundColor3 = itemtext.TextColor3 == Color3.fromRGB(160, 160, 160) and col or friendcirc.BackgroundColor3
+		friendsscrollingframe = friendsscrollingframe or FriendsTextList["ScrollingObject"] and FriendsTextList["ScrollingObject"]:FindFirstChild("ScrollingFrame")
+		if friendsscrollingframe then 
+			for i,v in pairs(friendsscrollingframe:GetChildren()) do 
+				local friendcirc = v:FindFirstChild("FriendCircle")
+				local itemtext = v:FindFirstChild("ItemText")
+				if friendcirc and itemtext then 
+					friendcirc.BackgroundColor3 = itemtext.TextColor3 == Color3.fromRGB(160, 160, 160) and col or friendcirc.BackgroundColor3
+				end
 			end
 		end
 		friendscreatetab["Color"] = col
@@ -429,7 +476,6 @@ ProfilesTextList = Profiles.CreateTextList({
 			bindbkg.Visible = GuiLibrary["Profiles"][profilename] and GuiLibrary["Profiles"][profilename]["Keybind"] ~= ""
 		end)
 		if GuiLibrary["Profiles"][profilename]["Keybind"] ~= "" then
-
 			bindtext.Text = GuiLibrary["Profiles"][profilename]["Keybind"]
 			local textsize = game:GetService("TextService"):GetTextSize(GuiLibrary["Profiles"][profilename]["Keybind"], 16, bindtext.Font, Vector2.new(99999, 99999))
 			newsize = UDim2.new(0, 13 + textsize.X, 0, 21)
@@ -677,15 +723,12 @@ OnlineProfilesExitButton.MouseButton1Click:Connect(function()
 end)
 
 GUI.CreateDivider()
----GUI.CreateCustomButton("Favorites", "vape/assets/FavoritesListIcon.png", UDim2.new(0, 17, 0, 14), function() end, function() end)
---GUI.CreateCustomButton("Text GUIVertical", "vape/assets/TextGUIIcon3.png", UDim2.new(1, -56, 0, 15), function() end, function() end)
 local TextGui = GuiLibrary.CreateCustomWindow({
 	["Name"] = "Text GUI", 
 	["Icon"] = "vape/assets/TextGUIIcon1.png", 
 	["IconSize"] = 21
 })
 local TextGuiCircleObject = {["CircleList"] = {}}
---GUI.CreateCustomButton("Text GUI", "vape/assets/TextGUIIcon2.png", UDim2.new(1, -23, 0, 15), function() TextGui.SetVisible(true) end, function() TextGui.SetVisible(false) end, "OptionsButton")
 GUI.CreateCustomToggle({
 	["Name"] = "Text GUI", 
 	["Icon"] = "vape/assets/TextGUIIcon3.png",
@@ -852,7 +895,8 @@ local function getSpaces(str)
 		return math.ceil(strSize.X / 3)
 end
 local function UpdateHud()
-	if GuiLibrary["MainGui"].ScaledGui.Visible then
+	local scaledgui = GuiLibrary["MainGui"]:FindFirstChild("ScaledGui")
+	if scaledgui and scaledgui.Visible then
 		local text = ""
 		local text2 = ""
 		local tableofmodules = {}
