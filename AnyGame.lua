@@ -2079,7 +2079,7 @@ HighJump = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOpt
 			highjumpbound = false
 			if HighJumpMethod["Value"] == "Toggle" then
 				if HighJumpTick > tick()  then
-					createwarning("LongJump", "Wait "..math.round(HighJumpTick - tick()).." before retoggling.", 1)
+					createwarning("HighJump", "Wait "..math.round(HighJumpTick - tick()).." before retoggling.", 1)
 				end
 				if HighJumpTick <= tick() and entity.isAlive and (entity.character.Humanoid:GetState() == Enum.HumanoidStateType.Running or entity.character.Humanoid:GetState() == Enum.HumanoidStateType.RunningNoPhysics) then
 					HighJumpTick = tick() + (HighJumpDelay["Value"] / 10)
