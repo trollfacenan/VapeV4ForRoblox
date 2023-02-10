@@ -1,5 +1,5 @@
 if shared.VapeExecuted then
-	local VERSION = "4.09"..(shared.VapePrivate and " PRIVATE" or "")
+	local VERSION = "4.10"..(shared.VapePrivate and " PRIVATE" or "")
 	local baseDirectory = (shared.VapePrivate and "vapeprivate/" or "vape/")
 	local universalRainbowValue = 0
 	local getcustomasset = getsynasset or getcustomasset or function(location) return "rbxasset://"..location end
